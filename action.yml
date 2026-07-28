@@ -49,4 +49,4 @@ outputs:
     description: List of tox environments to be run
 runs:
   using: docker
-  image: Dockerfile
+  image: 'docker://ghcr.io/step-security/dynamic-matrix:v4.2.1@sha256:a86bb8b45f887c414e3114a641b32ab2da720c55406978e4bfbb917bfef50d0e' # v4.2.1
