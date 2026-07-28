@@ -1,5 +1,5 @@
 # cspell:ignore trixie
-FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim
+FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim@sha256:ddcc6242921ee120cf279fdcedfc8bb917c9af4de9ad791495e4c7deb479a296
 ADD . /app
 WORKDIR /app
 
