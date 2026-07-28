@@ -281,3 +281,4 @@ FORCE_COLOR = "1"
 [tool.uv]
 default-groups = ["dev"]
 package = true
+exclude-newer = "3d"
