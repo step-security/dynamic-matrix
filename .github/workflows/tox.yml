@@ -1,0 +1,61 @@
+---
+name: tox
+
+on:
+  push: # only publishes pushes to the main branch to TestPyPI
+    branches: # any integration branch but not tag
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+
+concurrency:
+  # Avoids canceling push to main of the same commit (github.sha) but will
+  # cancel running builds when you update the source branch of a PR.
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref_name }}-${{ github.event.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 1 # tox, pytest, ansible-lint
+  PY_COLORS: 1
+
+jobs:
+  pre:
+    name: pre
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.generate_matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Determine matrix
+        id: generate_matrix
+        uses: ./
+        with:
+          min_python: "3.10"
+          max_python: "3.14"
+          default_python: "3.10"
+  build:
+    name: ${{ matrix.name || '?' }}
+    runs-on: ${{ matrix.os || 'ubuntu-24.04' }}
+    needs: pre
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.pre.outputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Set up Python ${{ matrix.uv_python_version }}
+        uses: step-security/setup-uv@v8
+        with:
+          python-version: ${{ matrix.uv_python_version }}
+      - run: |
+          set -exuo pipefail
+          uv tool install pip
+          uv tool install coverage
+          uv tool install tox --with tox-uv
+          uv --version
+          tox --version
+          pip --version
+          coverage --version
+      - run: "${{ matrix.command }}"
